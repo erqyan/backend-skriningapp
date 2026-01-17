@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Kriteria {
+  PHQ4
+  EPDS
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  nama              String
+  email             String    @unique
+  password_hash     String
+  role              Role
+  kriteria_skrining Kriteria?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  jawaban JawabanSkrining[]
+  hasil   HasilSkrining[]
+}
+
+model Skrining {
+  id         Int      @id @default(autoincrement())
+  nama       String
+  kriteria   Kriteria
+  deskripsi  String?
+  aktif      Boolean  @default(true)
+  created_at DateTime @default(now())
+
+  pertanyaan  PertanyaanSkrining[]
+  hasil       HasilSkrining[]
+  rekomendasi RekomendasiTindakan[]
+  jawaban     JawabanSkrining[]
+}
+
+model PertanyaanSkrining {
+  id           Int    @id @default(autoincrement())
+  skriningId   Int
+  pertanyaan   String
+  tipe_jawaban String
+  bobot        Int
+  urutan       Int
+
+  skrining Skrining          @relation(fields: [skriningId], references: [id])
+  jawaban  JawabanSkrining[]
+}
+
+model JawabanSkrining {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  skriningId    Int
+  pertanyaanId  Int
+  nilai_jawaban Int
+  created_at    DateTime @default(now())
+
+  user       User               @relation(fields: [userId], references: [id])
+  skrining   Skrining           @relation(fields: [skriningId], references: [id])
+  pertanyaan PertanyaanSkrining @relation(fields: [pertanyaanId], references: [id])
+}
+
+model HasilSkrining {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  skriningId       Int
+  skor_total       Int
+  kategori_hasil   String
+  tanggal_skrining DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  skrining Skrining @relation(fields: [skriningId], references: [id])
+}
+
+model RekomendasiTindakan {
+  id                 Int    @id @default(autoincrement())
+  skriningId         Int
+  skor_min           Int
+  skor_max           Int
+  deskripsi_tindakan String
+
+  skrining Skrining @relation(fields: [skriningId], references: [id])
+}

@@ -1,17 +1,24 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+exports.getAllHasil = async (req, res, next) => {
+  try {
+    const hasil = await prisma.hasilSkrining.findMany({
+      include: {
+        user: true,
+        skrining: true
+      }
+    });
+    res.json(hasil);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.createPertanyaan = async (req, res, next) => {
   try {
-    const {
-      skriningId,
-      pertanyaan,
-      tipe_jawaban,
-      bobot,
-      urutan
-    } = req.body;
+    const { skriningId, pertanyaan, tipe_jawaban, bobot, urutan } = req.body;
 
-    // validasi sederhana
     if (!skriningId || !pertanyaan || !tipe_jawaban || bobot === undefined || urutan === undefined) {
       return res.status(400).json({
         success: false,
@@ -19,7 +26,6 @@ exports.createPertanyaan = async (req, res, next) => {
       });
     }
 
-    // pastikan skrining ada
     const skrining = await prisma.skrining.findUnique({
       where: { id: Number(skriningId) }
     });
@@ -43,7 +49,6 @@ exports.createPertanyaan = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Pertanyaan skrining berhasil ditambahkan',
       data: created
     });
   } catch (err) {
@@ -54,32 +59,14 @@ exports.createPertanyaan = async (req, res, next) => {
 exports.updatePertanyaan = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { pertanyaan, tipe_jawaban, bobot, urutan } = req.body;
-
-    const existing = await prisma.pertanyaanSkrining.findUnique({
-      where: { id: Number(id) }
-    });
-
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        message: 'Pertanyaan skrining tidak ditemukan'
-      });
-    }
 
     const updated = await prisma.pertanyaanSkrining.update({
       where: { id: Number(id) },
-      data: {
-        pertanyaan,
-        tipe_jawaban,
-        bobot,
-        urutan
-      }
+      data: req.body
     });
 
     res.json({
       success: true,
-      message: 'Pertanyaan skrining berhasil diperbarui',
       data: updated
     });
   } catch (err) {
@@ -91,24 +78,13 @@ exports.deletePertanyaan = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const existing = await prisma.pertanyaanSkrining.findUnique({
-      where: { id: Number(id) }
-    });
-
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        message: 'Pertanyaan skrining tidak ditemukan'
-      });
-    }
-
     await prisma.pertanyaanSkrining.delete({
       where: { id: Number(id) }
     });
 
     res.json({
       success: true,
-      message: 'Pertanyaan skrining berhasil dihapus'
+      message: 'Pertanyaan berhasil dihapus'
     });
   } catch (err) {
     next(err);

@@ -3,9 +3,6 @@ const AppError = require('../utils/AppError');
 
 const prisma = new PrismaClient();
 
-/* =========================
-   GET PERTANYAAN SKRINING
-========================= */
 exports.getPertanyaan = async (req, res, next) => {
   try {
     // pastikan user ada
@@ -47,9 +44,6 @@ exports.getPertanyaan = async (req, res, next) => {
   }
 };
 
-/* =========================
-   SUBMIT JAWABAN SKRINING
-========================= */
 exports.submitJawaban = async (req, res, next) => {
   try {
     const { skriningId, jawaban } = req.body;
@@ -127,9 +121,6 @@ exports.submitJawaban = async (req, res, next) => {
   }
 };
 
-/* =========================
-   GET HASIL SKRINING USER
-========================= */
 exports.getHasil = async (req, res, next) => {
   try {
     const hasil = await prisma.hasilSkrining.findMany({

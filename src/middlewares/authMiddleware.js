@@ -2,6 +2,10 @@ const jwt = require('jsonwebtoken');
 const AppError = require('../utils/AppError');
 
 module.exports = (req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {

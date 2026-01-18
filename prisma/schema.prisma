@@ -24,12 +24,27 @@ model User {
   password_hash     String
   role              Role
   kriteria_skrining Kriteria?
+
+  nik               String
+  tanggal_lahir     DateTime
+  jenis_kelamin     String
+  no_telp           String
+
+  provinsi          String
+  kabupaten_kota    String
+  kecamatan         String
+  kelurahan         String
+
+  pendidikan        String
+  pekerjaan         String
+
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 
   jawaban JawabanSkrining[]
   hasil   HasilSkrining[]
 }
+
 
 model Skrining {
   id         Int      @id @default(autoincrement())

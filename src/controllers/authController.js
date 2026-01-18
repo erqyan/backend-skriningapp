@@ -7,10 +7,33 @@ const prisma = new PrismaClient();
 
 exports.register = async (req, res, next) => {
   try {
-    const { nama, email, password, kriteria_skrining } = req.body;
+    const {
+      nama,
+      email,
+      password,
+      kriteria_skrining,
 
-    if (!nama || !email || !password || !kriteria_skrining) {
-      throw new AppError('Data tidak lengkap', 400);
+      nik,
+      tanggal_lahir,
+      jenis_kelamin,
+      no_telp,
+
+      provinsi,
+      kabupaten_kota,
+      kecamatan,
+      kelurahan,
+
+      pendidikan,
+      pekerjaan
+    } = req.body;
+
+    if (
+      !nama || !email || !password || !kriteria_skrining ||
+      !nik || !tanggal_lahir || !jenis_kelamin || !no_telp ||
+      !provinsi || !kabupaten_kota || !kecamatan || !kelurahan ||
+      !pendidikan || !pekerjaan
+    ) {
+      throw new AppError('Data registrasi tidak lengkap', 400);
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -29,14 +52,27 @@ exports.register = async (req, res, next) => {
         email,
         password_hash: hash,
         role: 'USER',
-        kriteria_skrining
+        kriteria_skrining,
+
+        nik,
+        tanggal_lahir: new Date(tanggal_lahir),
+        jenis_kelamin,
+        no_telp,
+
+        provinsi,
+        kabupaten_kota,
+        kecamatan,
+        kelurahan,
+
+        pendidikan,
+        pekerjaan
       }
     });
 
     res.status(201).json({
       success: true,
       message: 'Registrasi berhasil',
-      data: user
+      user_id: user.id
     });
   } catch (err) {
     next(err);

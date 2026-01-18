@@ -5,7 +5,30 @@ const prisma = new PrismaClient();
 
 exports.getPertanyaan = async (req, res, next) => {
   try {
-    // pastikan user ada
+    if (req.user.role === 'ADMIN') {
+      const skriningList = await prisma.skrining.findMany({
+        where: { aktif: true },
+        include: {
+          pertanyaan: {
+            orderBy: { urutan: 'asc' }
+          }
+        },
+        orderBy: {
+          id: 'asc'
+        }
+      });
+
+      if (!skriningList || skriningList.length === 0) {
+        throw new AppError('Data skrining tidak tersedia', 404);
+      }
+
+      return res.json({
+        success: true,
+        role: 'ADMIN',
+        data: skriningList
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: req.user.id }
     });
@@ -18,7 +41,6 @@ exports.getPertanyaan = async (req, res, next) => {
       throw new AppError('Kriteria skrining belum ditentukan', 400);
     }
 
-    // ambil skrining sesuai kriteria user
     const skrining = await prisma.skrining.findFirst({
       where: {
         kriteria: user.kriteria_skrining,
@@ -37,12 +59,14 @@ exports.getPertanyaan = async (req, res, next) => {
 
     res.json({
       success: true,
+      role: 'USER',
       data: skrining
     });
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.submitJawaban = async (req, res, next) => {
   try {

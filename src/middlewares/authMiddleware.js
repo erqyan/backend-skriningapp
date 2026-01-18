@@ -21,6 +21,6 @@ module.exports = (req, res, next) => {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
   } catch (err) {
-    next(err); // akan ditangani global handler
+    next(err);
   }
 };
